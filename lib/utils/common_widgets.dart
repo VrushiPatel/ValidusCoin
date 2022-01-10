@@ -255,7 +255,8 @@ Container getFormPart(String title, Function onClick, String value) {
 
 Container getEditForm(String title, String message, String hint,
     Function onSubmit, Function close, TextEditingController controller,
-    {TextInputType textInputType = TextInputType.name}) {
+    {TextInputType textInputType = TextInputType.name,
+    bool isAddress = false}) {
   return Container(
     child: Column(
       children: [
@@ -310,20 +311,29 @@ Container getEditForm(String title, String message, String hint,
                 alignment: Alignment.topLeft,
                 margin: EdgeInsets.only(top: 10, left: 15),
               ),
-              Container(
-                margin: EdgeInsets.only(bottom: 10, top: 5),
-                child: TextField(
-                  onSubmitted: (v) {
+              GestureDetector(
+                onTap: () {
+                  if (isAddress) {
                     onSubmit();
-                  },
-                  controller: controller,
-                  expands: false,
-                  keyboardType: textInputType,
-                  style: TextStyle(color: cardFontColor, fontFamily: "Grotesk"),
-                  decoration: InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.only(left: 15),
+                  }
+                },
+                child: Container(
+                  margin: EdgeInsets.only(bottom: 10, top: 5),
+                  child: TextField(
+                    enabled: !isAddress,
+                    onSubmitted: (v) {
+                      onSubmit();
+                    },
+                    controller: controller,
+                    expands: false,
+                    keyboardType: textInputType,
+                    style:
+                        TextStyle(color: cardFontColor, fontFamily: "Grotesk"),
+                    decoration: InputDecoration(
+                      isDense: true,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.only(left: 15),
+                    ),
                   ),
                 ),
               ),
@@ -342,10 +352,12 @@ Widget getSaveButton(String title, Function onClick) {
     },
     child: Container(
         margin: EdgeInsets.only(left: 20, right: 20, bottom: 20, top: 10),
-        padding: EdgeInsets.all(10),
         width: double.infinity,
-        color: buttonBackgroundColor,
-        child: Center(
+        child: ElevatedButton(
+            onPressed: () {
+              onClick();
+            },
+            style: ElevatedButton.styleFrom(primary: buttonBackgroundColor),
             child: getSubTitle(title,
                 fontSize: 20, fontFamily: "Grotesk", color: Colors.black))),
   );

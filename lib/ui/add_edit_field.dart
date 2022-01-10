@@ -2,6 +2,8 @@ import 'package:ValidusCoin/utils/common_widgets.dart';
 import 'package:ValidusCoin/utils/custom_colors.dart';
 import 'package:ValidusCoin/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:google_maps_place_picker/google_maps_place_picker.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class AddEditField extends StatefulWidget {
   final String keyName;
@@ -15,7 +17,7 @@ class AddEditField extends StatefulWidget {
 class _AddEditFieldState extends State<AddEditField> {
   TextEditingController controller = TextEditingController();
   SecureStorage storage = SecureStorage();
-
+  static final kInitialPosition = LatLng(-33.8567844, 151.213108);
   String data = "";
 
   @override
@@ -48,9 +50,34 @@ class _AddEditFieldState extends State<AddEditField> {
               Expanded(
                 child: ListView(
                   children: [
-                    getEditForm(setTitle(), setMessage(), setHint(), () {}, () {
+                    getEditForm(setTitle(), setMessage(), setHint(), () {
+                      if (widget.keyName == SecureStorage.addressKey) {
+                        Navigator.push(context, MaterialPageRoute(
+                          builder: (context) {
+                            return PlacePicker(
+                              apiKey: "AIzaSyB071bKOX6LFWXp4wuczsIS2UQuuNJzaIs",
+                              useCurrentLocation: true,
+                              selectInitialPosition: true,
+                              initialPosition: kInitialPosition,
+                              //usePlaceDetailSearch: true,
+                              searchingText: controller.text,
+                              onPlacePicked: (result) {
+                                controller.text =
+                                    (result).formattedAddress ?? "";
+                                saveData(c);
+                                Navigator.of(context).pop();
+                                setState(() {});
+                              },
+                            );
+                          },
+                        ));
+                      }
+                    }, () {
                       Navigator.pop(context);
-                    }, controller, textInputType: setInputType()),
+                    }, controller,
+                        textInputType: setInputType(),
+                        isAddress:
+                            (widget.keyName == SecureStorage.addressKey)),
                   ],
                 ),
               ),
@@ -91,6 +118,7 @@ class _AddEditFieldState extends State<AddEditField> {
   void saveData(BuildContext c) {
     if (widget.keyName == SecureStorage.nameKey) {
       storage.setValue(widget.keyName, controller.text);
+      Navigator.pop(context);
     } else if (widget.keyName == SecureStorage.emailKey) {
       bool emailValid = RegExp(
               r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
@@ -98,6 +126,7 @@ class _AddEditFieldState extends State<AddEditField> {
 
       if (emailValid) {
         storage.setValue(widget.keyName, controller.text);
+        Navigator.pop(context);
       } else {
         Scaffold.of(c).showSnackBar(SnackBar(
           content: getSubTitle("Invalid email address!"),
@@ -105,6 +134,7 @@ class _AddEditFieldState extends State<AddEditField> {
       }
     } else {
       storage.setValue(widget.keyName, controller.text);
+      Navigator.pop(context);
     }
   }
 
